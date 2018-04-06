@@ -1,0 +1,21 @@
+{
+  "name": "ngx-mat-data-table",
+  "version": "0.0.0",
+  "repository": "",
+  "author": "",
+  "license": "",
+  "private": true,
+  "peerDependencies": {
+    "@angular/core": ">=5.2.0",
+    "@angular/common": ">=5.2.0",
+    "@angular/cdk": ">=5.2.4",
+    "@angular/material": ">=5.2.4"
+  },
+  "ngPackage": {
+    "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+    "dest": "../lib/dist",
+    "lib": {
+      "entryFile": "src/index.ts"
+    }
+  }
+}

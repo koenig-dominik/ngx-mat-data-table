@@ -1,0 +1,41 @@
+:host {
+  display: block;
+
+  ::ng-deep {
+    .mat-card {
+      padding: 0;
+      .mat-card-header {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-top: 24px;
+      }
+    }
+
+    .mat-cell {
+      .mat-input-underline {
+        visibility: hidden;
+      }
+    }
+  }
+
+  .mat-column-select {
+    max-width: 44px;
+    overflow: visible;
+  }
+
+  .mat-cell {
+    .edit-button {
+      cursor: pointer;
+      line-height: 24px;
+      margin-right: 24px;
+      .mat-icon {
+        float: right;
+      }
+    }
+  }
+}
+
+.full-height-menu-item {
+  height: auto;
+  line-height: initial;
+}

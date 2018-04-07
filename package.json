@@ -7,7 +7,7 @@
     "start": "ng serve",
     "test": "ng test",
     "lint": "ng lint",
-    "build:lib": "move-cli lib/dist/.git lib/.gittmp && ng-packagr -p lib/package.json && move-cli lib/.gittmp lib/dist/.git"
+    "build:lib": "ng-packagr -p lib/package.json"
   },
   "private": true,
   "dependencies": {

@@ -1,4 +1,0 @@
-[submodule "lib/dist"]
-	path = lib/dist
-	url = git@git.1vh.de:common/ngx-mat-data-table.git
-	branch = dist

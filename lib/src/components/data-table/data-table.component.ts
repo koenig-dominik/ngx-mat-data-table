@@ -99,9 +99,9 @@ import {startWith, tap} from 'rxjs/operators';
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>
-        <mat-paginator #paginator
-                       [pageSize]="10"
+        <mat-paginator [pageSize]="5"
                        [pageSizeOptions]="[5, 10, 20]"
+                       [length]="dataCount"
                        [showFirstLastButtons]="true">
         </mat-paginator>
       </mat-card-content>
@@ -116,16 +116,17 @@ export class DataTableComponent implements OnInit {
   @Input() sortColumn: string;
   @Input() uniqueColumn: string;
 
-  @Input() loadData: (options: LoadDataOptions) => Observable<{}[]>;
+  @Input() loadData: (options: LoadDataOptions) => Observable<{count: number, items: {}[]}>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   displayedColumns = ['select'];
   dataSource = new MatTableDataSource<{}>([]);
+  dataCount = 0;
   selection = new SelectionModel<any[]>(true, []);
-  loading: boolean;
-  debouncing: boolean;
+  loading = true;
+  debouncing = false;
   filter: string;
   filterChanged: EventEmitter<string> = new EventEmitter<string>();
 
@@ -186,12 +187,16 @@ export class DataTableComponent implements OnInit {
           });
         })
       )
-      .subscribe((data: {}[]) => {
+      .subscribe((data) => {
         this.loading = false;
 
-        console.log('in', data);
+        // Really bad hack...
+        this.dataCount = data.count + 1;
+        setTimeout(() => {
+          this.dataCount--;
+        }, 1);
 
-        for (const row of data) {
+        for (const row of data.items) {
           let existingRowIndex;
 
           let i = 0;
@@ -209,8 +214,6 @@ export class DataTableComponent implements OnInit {
             this.dataSource.data.push(row);
           }
         }
-
-        console.log('ou', this.dataSource.data);
 
         // noinspection SillyAssignmentJS
         this.dataSource.data = this.dataSource.data; // This is here to force a table update

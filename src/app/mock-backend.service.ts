@@ -38,6 +38,7 @@ export class MockBackendService {
     await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
 
     const filteredData = {};
+    let filteredDataLength = 0;
     for (let i = 0; i < this.data.length; i++) {
 
       let oneMatches = false;
@@ -56,6 +57,7 @@ export class MockBackendService {
         continue;
       }
 
+      filteredDataLength++;
       filteredData[this.data[i].id] = this.data[i];
     }
 
@@ -79,7 +81,7 @@ export class MockBackendService {
       }
     }
 
-    return pagedData;
+    return {count: filteredDataLength, items: pagedData};
   }
 
 }

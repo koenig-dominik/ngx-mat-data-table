@@ -1,0 +1,95 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{title}}</mat-card-title>
+    <mat-card-subtitle>
+      <mat-form-field>
+        <input [ngModel]="filter" (ngModelChange)="filterChange($event)" matInput placeholder="Filter">
+      </mat-form-field>
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-progress-bar *ngIf="loading || debouncing" [mode]="debouncing ? 'buffer' : 'indeterminate'"></mat-progress-bar>
+    <mat-table #table [dataSource]="dataSource"
+               matSort [matSortActive]="sortColumn" matSortDisableClear matSortDirection="asc">
+
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container *ngFor="let column of columns" [matColumnDef]="column.name">
+        <mat-header-cell mat-sort-header *matHeaderCellDef [style.max-width]="column.width">{{column.label}}</mat-header-cell>
+        <mat-cell *matCellDef="let row" [style.max-width]="column.width">
+          <ng-container *ngIf="!column.editable; else editable">
+
+            <ng-container *ngIf="row[column.name].constructor.name !== 'Date'; else date">
+              {{row[column.name]}}
+            </ng-container>
+
+            <ng-template #date>
+              {{row[column.name] | date}}
+            </ng-template>
+
+          </ng-container>
+          <ng-template #editable>
+
+            <ng-container *ngIf="column.values; else elseIf">
+              <mat-form-field>
+                <mat-select [value]="row[column.name]">
+                  <mat-option *ngFor="let value of column.values" [value]="value">
+                    {{ value }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+
+            <ng-template #elseIf>
+              <ng-container *ngIf="row[column.name].constructor.name !== 'Date'; else datepicker">
+                <div class="edit-button" [matMenuTriggerFor]="menu">
+                  {{row[column.name]}}
+                  <mat-icon>edit_mode</mat-icon>
+                </div>
+                <mat-menu #menu="matMenu">
+                  <div mat-menu-item disabled class="full-height-menu-item">
+                    <mat-form-field class="mat-cell"> <!-- mat-cell is a hack to override the disabled state of mat-menu-item -->
+                      <input matInput #message [attr.maxlength]="column.maxLength" [value]="row[column.name]">
+                      <mat-hint align="end">{{message.value.length}} / {{column.maxLength}}</mat-hint>
+                    </mat-form-field>
+                  </div>
+                </mat-menu>
+              </ng-container>
+
+              <ng-template #datepicker>
+                <mat-form-field>
+                  <input matInput [matDatepicker]="picker" [value]="row[column.name]">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </ng-template>
+            </ng-template>
+
+          </ng-template>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+    <mat-paginator [pageSize]="5"
+                   [pageSizeOptions]="[5, 10, 20]"
+                   [length]="dataCount"
+                   [showFirstLastButtons]="true">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

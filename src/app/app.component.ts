@@ -15,10 +15,10 @@ import { MockBackendService } from './mock-backend.service';
 export class AppComponent {
 
   columns = [
-    {name: 'id', label: 'ID', width: '60px'},
-    {name: 'language', label: 'Language', width: '210px', editable: true, values: ['de', 'en']},
+    {name: 'id', label: 'ID', width: 60},
+    {name: 'language', label: 'Language', width: 70, editable: true, values: ['de', 'en']},
     {name: 'email', label: 'Email', editable: true, maxLength: 80},
-    {name: 'createdAt', label: 'Created at', editable: true},
+    {name: 'createdAt', label: 'Created at', width: 100, editable: true},
     {name: 'updatedAt', label: 'Updated at'}
   ];
 

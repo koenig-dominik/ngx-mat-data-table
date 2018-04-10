@@ -29,8 +29,8 @@
       </ng-container>
 
       <ng-container *ngFor="let column of columns" [matColumnDef]="column.name">
-        <mat-header-cell mat-sort-header *matHeaderCellDef [style.max-width]="column.width">{{column.label}}</mat-header-cell>
-        <mat-cell *matCellDef="let row" [style.max-width]="column.width">
+        <mat-header-cell mat-sort-header *matHeaderCellDef [style.max-width]="(column.width + 24) + 'px'">{{column.label}}</mat-header-cell>
+        <mat-cell *matCellDef="let row" [style.max-width]="(column.width + 24) + 'px'">
           <ng-container *ngIf="!column.editable; else editable">
 
             <ng-container *ngIf="row[column.name].constructor.name !== 'Date'; else date">
@@ -45,7 +45,7 @@
           <ng-template #editable>
 
             <ng-container *ngIf="column.values; else elseIf">
-              <mat-form-field>
+              <mat-form-field [style.max-width]="column.width + 'px'">
                 <mat-select [value]="row[column.name]">
                   <mat-option *ngFor="let value of column.values" [value]="value">
                     {{ value }}
@@ -62,7 +62,7 @@
                 </div>
                 <mat-menu #menu="matMenu">
                   <div mat-menu-item disabled class="full-height-menu-item">
-                    <mat-form-field class="mat-cell"> <!-- mat-cell is a hack to override the disabled state of mat-menu-item -->
+                    <mat-form-field class="mat-cell" [style.max-width]="column.width + 'px'"> <!-- mat-cell is a hack to override the disabled state of mat-menu-item -->
                       <input matInput #message [attr.maxlength]="column.maxLength" [value]="row[column.name]">
                       <mat-hint align="end">{{message.value.length}} / {{column.maxLength}}</mat-hint>
                     </mat-form-field>
@@ -71,7 +71,7 @@
               </ng-container>
 
               <ng-template #datepicker>
-                <mat-form-field>
+                <mat-form-field [style.max-width]="column.width + 'px'">
                   <input matInput [matDatepicker]="picker" [value]="row[column.name]">
                   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>

@@ -23,8 +23,8 @@ export class MockBackendService {
         language: languages[Math.round(rand1)],
         referrerId: Math.floor(rand1 * entries),
         avatar: '',
-        createdAt: new Date(Date.now() -  (rand3 * (60 * 60 * 24 * 800))),
-        updatedAt: new Date(Date.now() -  (rand2 * (60 * 60 * 24 * 30)))
+        createdAt: new Date(Date.now() -  (rand3 * (60 * 60 * 24 * 800)) * 1000),
+        updatedAt: new Date(Date.now() -  (rand2 * (60 * 60 * 24 * 30)) * 1000)
       });
     }
   }

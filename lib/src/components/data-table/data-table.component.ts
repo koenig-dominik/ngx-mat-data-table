@@ -22,7 +22,7 @@ export class DataTableComponent<T> implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
 
   displayedColumns = ['select'];
-  selection = new SelectionModel<any[]>(true, []);
+  selection = new SelectionModel<T>(true, []);
   filter: string;
   filterChanged: EventEmitter<string> = new EventEmitter<string>();
 
@@ -51,7 +51,7 @@ export class DataTableComponent<T> implements OnInit {
     if (this.isAllSelected()) {
       this.selection.clear();
     } else {
-      this.selection.select(this.dataSource.renderedRows);
+      this.selection.select(...this.dataSource.renderedRows);
     }
   }
 

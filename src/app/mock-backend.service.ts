@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {LoadDataOptions} from '../../lib/src/components/data-table/data-table.component';
 
 @Injectable()
 export class MockBackendService {
@@ -37,17 +36,16 @@ export class MockBackendService {
   public async get(filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) {
     await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
 
-    const filteredData = {};
-    let filteredDataLength = 0;
-    for (let i = 0; i < this.data.length; i++) {
+    const filteredData = [];
+    for (const row of this.data) {
 
       let oneMatches = false;
-      for (const key in this.data[i]) {
-        if (!this.data[i].hasOwnProperty(key)) {
+      for (const key in row) {
+        if (!row.hasOwnProperty(key)) {
           continue;
         }
 
-        if (String(this.data[i][key]).indexOf(filter) !== -1) {
+        if (String(row[key]).indexOf(filter) !== -1) {
           oneMatches = true;
           break;
         }
@@ -57,8 +55,24 @@ export class MockBackendService {
         continue;
       }
 
-      filteredDataLength++;
-      filteredData[this.data[i].id] = this.data[i];
+      filteredData.push(row);
+    }
+
+    filteredData.sort(function(a, b) {
+      let x = a[sortColumn];
+      let y = b[sortColumn];
+
+      if (typeof x === 'string') {
+        x = x.toLowerCase();
+      }
+      if (typeof y === 'string') {
+        y = y.toLowerCase();
+      }
+
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+    if (sortDirection === 'desc') {
+      filteredData.reverse();
     }
 
     const pagedData = [];
@@ -81,7 +95,7 @@ export class MockBackendService {
       }
     }
 
-    return {count: filteredDataLength, items: pagedData};
+    return {count: filteredData.length, items: pagedData};
   }
 
 }

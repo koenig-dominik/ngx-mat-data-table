@@ -9,7 +9,7 @@ export class MockBackendService {
   private data = [];
 
   constructor() {
-    const entries = 500;
+    const entries = 502;
     const languages = ['en', 'de'];
     const emails = ['web.de', 'gmail.com', 'googlemail.com', 'gmx.com', 'msn.com'];
 
@@ -34,7 +34,7 @@ export class MockBackendService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  public async get(options: LoadDataOptions) {
+  public async get(filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) {
     await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
 
     const filteredData = {};
@@ -47,7 +47,7 @@ export class MockBackendService {
           continue;
         }
 
-        if (String(this.data[i][key]).indexOf(options.filter) !== -1) {
+        if (String(this.data[i][key]).indexOf(filter) !== -1) {
           oneMatches = true;
           break;
         }
@@ -68,7 +68,7 @@ export class MockBackendService {
       if (!filteredData.hasOwnProperty(i)) {
         continue;
       }
-      if (skipped < options.offset) {
+      if (skipped < offset) {
         skipped++;
         continue;
       }
@@ -76,7 +76,7 @@ export class MockBackendService {
       pagedData.push(filteredData[i]);
       dataSliceLength++;
 
-      if (dataSliceLength === options.pageSize) {
+      if (dataSliceLength === fetchSize) {
         break;
       }
     }

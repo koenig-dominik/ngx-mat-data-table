@@ -8,7 +8,7 @@
     </mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
-    <mat-progress-bar *ngIf="loading || debouncing" [mode]="debouncing ? 'buffer' : 'indeterminate'"></mat-progress-bar>
+    <mat-progress-bar *ngIf="(dataSource.loading | async) || (dataSource.buffering | async)" [mode]="(dataSource.buffering | async) ? 'buffer' : 'indeterminate'"></mat-progress-bar>
     <mat-table #table [dataSource]="dataSource"
                matSort [matSortActive]="sortColumn" matSortDisableClear matSortDirection="asc">
 
@@ -88,7 +88,6 @@
     </mat-table>
     <mat-paginator [pageSize]="5"
                    [pageSizeOptions]="[5, 10, 20]"
-                   [length]="dataCount"
                    [showFirstLastButtons]="true">
     </mat-paginator>
   </mat-card-content>

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { LoadDataOptions } from '../../lib/src/components/data-table/data-table.component';
 import { MockBackendService } from './mock-backend.service';
+import { AsyncDataSource } from '../../lib/src/components/data-table/async-data-source';
 
 @Component({
   selector: 'app-root',
   template: `
-    <ngx-mat-data-table title="Accounts" sortColumn="createdAt" uniqueColumn="id" [loadData]="loadData()" [columns]="columns">
+    <ngx-mat-data-table title="Accounts" sortColumn="createdAt" uniqueColumn="id" 
+                        [dataSource]="dataSource" [columns]="columns">
       
     </ngx-mat-data-table>
   `,
@@ -22,13 +23,15 @@ export class AppComponent {
     {name: 'updatedAt', label: 'Updated at'}
   ];
 
-  constructor(private mockBackendService: MockBackendService) {
+  dataSource: AsyncDataSource<{}>;
 
+  constructor(private mockBackendService: MockBackendService) {
+    this.dataSource = new AsyncDataSource<{}>('id', this.loadData());
   }
 
   loadData() {
-    return async (options: LoadDataOptions) => {
-      return await this.mockBackendService.get(options);
+    return async (filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) => {
+      return await this.mockBackendService.get(filter, sortColumn, sortDirection, offset, fetchSize);
     };
   }
 

@@ -8,7 +8,7 @@ import {debounceTime} from 'rxjs/operators/debounceTime';
 import {distinctUntilChanged} from 'rxjs/operators/distinctUntilChanged';
 import {EventEmitter} from '@angular/core';
 
-type FetchFunction<T> = (
+export type FetchFunction<T> = (
   filter: string,
   sortColumn: string,
   sortDirection: string,
@@ -19,7 +19,7 @@ type FetchFunction<T> = (
   items: T[]
 }>;
 
-type ChangeFunction<T> = (
+export type ChangeFunction<T> = (
   column: string,
   values: T
 ) => Promise<void>;

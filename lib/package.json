@@ -13,7 +13,7 @@
   },
   "ngPackage": {
     "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
-    "dest": "../dist",
+    "dest": "../lib/dist",
     "lib": {
       "entryFile": "src/index.ts"
     }

@@ -1,0 +1,4 @@
+[submodule "lib/dist"]
+	path = lib/dist
+	url = https://github.com/koenig-dominik/ngx-mat-data-table.git
+	branch = dist-dev

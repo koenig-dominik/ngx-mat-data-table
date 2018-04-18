@@ -1,9 +1,9 @@
-import 'tslib';
-import 'rxjs/BehaviorSubject';
+import { __awaiter } from 'tslib';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { merge } from 'rxjs/observable/merge';
-import 'rxjs/operators';
-import 'rxjs/operators/debounceTime';
-import 'rxjs/operators/distinctUntilChanged';
+import { tap } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators/debounceTime';
+import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { Component, EventEmitter, Input, ViewChild, NgModule } from '@angular/core';
 import { MatPaginator, MatSnackBar, MatSort, MatCardModule, MatCheckboxModule, MatFormFieldModule, MatInputModule, MatTableModule, MatDatepickerModule, MatNativeDateModule, MatSelectModule, MatIconModule, MatMenuModule, MatPaginatorModule, MatSortModule, MatProgressBarModule, MatSnackBarModule } from '@angular/material';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -18,6 +18,170 @@ import { FormsModule } from '@angular/forms';
 /**
  * @template T
  */
+class AsyncDataSource {
+    /**
+     * @param {?} uniqueKey
+     * @param {?} fetchData
+     * @param {?} changeData
+     * @param {?=} debounce
+     */
+    constructor(uniqueKey, fetchData, changeData, debounce = 300) {
+        this.uniqueKey = uniqueKey;
+        this.fetchData = fetchData;
+        this.changeData = changeData;
+        this.debounce = debounce;
+        this.filter = '';
+        this.renderedRowsSubject = new BehaviorSubject([]);
+        this.loadingSubject = new BehaviorSubject(false);
+        this.bufferingSubject = new BehaviorSubject(false);
+        this.saveErrorSubject = new BehaviorSubject('');
+        this.rows = new Map();
+        this.rowsViews = new Map();
+        this.savingRows = new Map();
+        this.savingRowsViews = new Map();
+        this.loading = this.loadingSubject.asObservable();
+        this.buffering = this.bufferingSubject.asObservable();
+        this.saveError = this.saveErrorSubject.asObservable();
+    }
+    /**
+     * @return {?}
+     */
+    get renderedRows() {
+        return this.renderedRowsSubject.value;
+    }
+    /**
+     * @param {?} collectionViewer
+     * @return {?}
+     */
+    connect(collectionViewer) {
+        return this.renderedRowsSubject.asObservable();
+    }
+    /**
+     * @param {?} collectionViewer
+     * @return {?}
+     */
+    disconnect(collectionViewer) {
+        this.renderedRowsSubject.complete();
+        this.loadingSubject.complete();
+        this.bufferingSubject.complete();
+        this.saveErrorSubject.complete();
+        /*for (const savingRow of this.savingCells) {
+              for (const savingSubject of Array.from(savingRow.values())) {
+                savingSubject.complete();
+              }
+            }*/
+    }
+    /**
+     * @param {?} paginator
+     * @param {?} sort
+     * @param {?} filterEvent
+     * @param {?} editedEvent
+     * @return {?}
+     */
+    setup(paginator, sort, filterEvent, editedEvent) {
+        this.paginator = paginator;
+        this.sort = sort;
+        merge(filterEvent, this.sort.sortChange, this.paginator.page).pipe(tap((value) => {
+            if (typeof value === 'string') {
+                // If the value is of type string it must be the filter
+                this.filter = value;
+            }
+            this.bufferingSubject.next(true);
+        }), debounceTime(this.debounce), tap(() => {
+            this.bufferingSubject.next(false);
+        }), distinctUntilChanged((oldValue, newValue) => {
+            // Ignore all events until the value was actually changed
+            if (oldValue.pageIndex !== undefined) {
+                // Handle paginator events
+                return oldValue.pageIndex === newValue.pageIndex && oldValue.pageSize === newValue.pageSize;
+            }
+            else if (oldValue.direction !== undefined) {
+                // Handle sort events
+                return oldValue.active === newValue.active && oldValue.direction === newValue.direction;
+            }
+            else {
+                // Handle filter events
+                return oldValue === newValue;
+            }
+        })).subscribe(() => {
+            // noinspection JSIgnoredPromiseFromCall
+            this.updateCurrentView();
+        });
+        Promise.resolve().then(() => {
+            // This skips one tick. This is needed for the paginator and sorter to work correctly
+            // noinspection JSIgnoredPromiseFromCall
+            this.updateCurrentView();
+        });
+        editedEvent.pipe(debounceTime(this.debounce)).subscribe((event) => __awaiter(this, void 0, void 0, function* () {
+            const /** @type {?} */ renderedSavingRow = this.renderedSavingRows[event.rowIndex];
+            renderedSavingRow.get(event.column).next(true);
+            try {
+                yield this.changeData(event.column, event.values);
+            }
+            catch (/** @type {?} */ error) {
+                this.saveErrorSubject.next(error);
+            }
+            finally {
+                renderedSavingRow.get(event.column).next(false);
+            }
+        }));
+    }
+    /**
+     * @return {?}
+     */
+    updateCurrentView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.currentOffset = this.paginator.pageIndex * this.paginator.pageSize;
+            this.loadingSubject.next(true);
+            const /** @type {?} */ result = yield this.fetchData(this.filter, this.sort.active, this.sort.direction, this.currentOffset, this.paginator.pageSize);
+            this.paginator.length = result.count;
+            const /** @type {?} */ viewKey = `${this.filter};${this.sort.active};${this.sort.direction}`;
+            if (this.rowsViews.has(viewKey) === false) {
+                this.rowsViews.set(viewKey, []);
+                this.savingRowsViews.set(viewKey, []);
+            }
+            this.currentView = this.rowsViews.get(viewKey);
+            this.currentSavingRowsView = this.savingRowsViews.get(viewKey);
+            for (let /** @type {?} */ i = 0, /** @type {?} */ length = result.items.length; i < length; i++) {
+                const /** @type {?} */ row = result.items[i];
+                const /** @type {?} */ uniqueValue = row[this.uniqueKey];
+                // This is here, so that the rowsViews don't lose their references to the original row
+                if (!this.rows.has(uniqueValue)) {
+                    this.rows.set(uniqueValue, row);
+                }
+                else {
+                    for (const /** @type {?} */ column in row) {
+                        if (!row.hasOwnProperty(column)) {
+                            continue;
+                        }
+                        this.rows.get(uniqueValue)[column] = row[column];
+                    }
+                }
+                if (!this.savingRows.has(uniqueValue)) {
+                    const /** @type {?} */ columns = new Map();
+                    for (const /** @type {?} */ column in row) {
+                        if (!row.hasOwnProperty(column)) {
+                            continue;
+                        }
+                        columns.set(column, new BehaviorSubject(false));
+                    }
+                    this.savingRows.set(uniqueValue, columns);
+                }
+                this.currentView[this.currentOffset + i] = this.rows.get(uniqueValue);
+                this.currentSavingRowsView[this.currentOffset + i] = this.savingRows.get(uniqueValue);
+            }
+            this.updateRenderedRows();
+            this.loadingSubject.next(false);
+        });
+    }
+    /**
+     * @return {?}
+     */
+    updateRenderedRows() {
+        this.renderedSavingRows = this.currentSavingRowsView.slice(this.currentOffset, this.currentOffset + this.paginator.pageSize);
+        this.renderedRowsSubject.next(this.currentView.slice(this.currentOffset, this.currentOffset + this.paginator.pageSize));
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -265,5 +429,5 @@ DataTableModule.ctorParameters = () => [];
  * Generated bundle index. Do not edit.
  */
 
-export { DataTableModule, DataTableComponent as ɵa };
+export { DataTableModule, AsyncDataSource, DataTableComponent as ɵa };
 //# sourceMappingURL=ngx-mat-data-table.js.map

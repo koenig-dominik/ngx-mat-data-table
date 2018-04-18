@@ -2,7 +2,7 @@ import { OnInit } from '@angular/core';
 import { MatPaginator, MatSnackBar, MatSort } from '@angular/material';
 import { SelectionModel } from '@angular/cdk/collections';
 import 'rxjs/add/operator/skip';
-import { AsyncDataSource } from './async-data-source';
+import { AsyncDataSource } from '../../async-data-source';
 export declare class DataTableComponent<T> implements OnInit {
     private snackBar;
     title: string;

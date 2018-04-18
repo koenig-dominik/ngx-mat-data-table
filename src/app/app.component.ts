@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MockBackendService } from './mock-backend.service';
-import { AsyncDataSource } from '../../lib/src/components/data-table/async-data-source';
+import { AsyncDataSource } from '../../lib/src/async-data-source';
 
 @Component({
   selector: 'app-root',

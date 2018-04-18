@@ -4,7 +4,7 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {merge} from 'rxjs/observable/merge';
 import 'rxjs/add/operator/skip';
 
-import {AsyncDataSource} from './async-data-source';
+import {AsyncDataSource} from '../../async-data-source';
 
 @Component({
   selector: 'ngx-mat-data-table',

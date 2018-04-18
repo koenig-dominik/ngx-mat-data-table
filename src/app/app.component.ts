@@ -26,12 +26,18 @@ export class AppComponent {
   dataSource: AsyncDataSource<{}>;
 
   constructor(private mockBackendService: MockBackendService) {
-    this.dataSource = new AsyncDataSource<{}>('id', this.loadData());
+    this.dataSource = new AsyncDataSource<{}>('id', this.loadData(), this.saveData());
   }
 
   loadData() {
     return async (filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) => {
       return await this.mockBackendService.get(filter, sortColumn, sortDirection, offset, fetchSize);
+    };
+  }
+
+  saveData() {
+    return async (column: string, values: {}) => {
+      return await this.mockBackendService.update(column, values);
     };
   }
 

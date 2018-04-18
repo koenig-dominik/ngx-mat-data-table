@@ -33,6 +33,16 @@ export class MockBackendService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  public async update(column: string, values: {}) {
+    await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
+
+    console.log('Update', column, values);
+
+    if (values[column] === 'test-error') {
+      throw new Error('Test error message');
+    }
+  }
+
   public async get(filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) {
     await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
 

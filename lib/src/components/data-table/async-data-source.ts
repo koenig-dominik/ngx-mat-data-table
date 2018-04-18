@@ -19,28 +19,41 @@ type FetchFunction<T> = (
   items: T[]
 }>;
 
+type ChangeFunction<T> = (
+  column: string,
+  values: T
+) => Promise<void>;
+
 export class AsyncDataSource<T> implements DataSource<T> {
-
-  private renderedRowsSubject = new BehaviorSubject<T[]>([]);
-  private loadingSubject = new BehaviorSubject(false);
-  private bufferingSubject = new BehaviorSubject(false);
-
-  private rows = new Map<string, T[]>();
-  private rowsViews = new Map<string, T[]>();
-  private currentView: T[];
-  private currentOffset: number;
-
-  public readonly loading = this.loadingSubject.asObservable();
-  public readonly buffering = this.bufferingSubject.asObservable();
-  public get renderedRows() {
-    return this.renderedRowsSubject.value;
-  }
 
   private paginator: MatPaginator;
   private sort: MatSort;
   private filter = '';
 
-  constructor(private uniqueKey, private fetchData: FetchFunction<T>, private debounce = 300) {}
+  private renderedRowsSubject = new BehaviorSubject<T[]>([]);
+  private loadingSubject = new BehaviorSubject(false);
+  private bufferingSubject = new BehaviorSubject(false);
+  private saveErrorSubject = new BehaviorSubject('');
+
+  private rows = new Map<string, T>();
+  private rowsViews = new Map<string, T[]>();
+  private currentView: T[];
+  private currentOffset: number;
+
+  private savingRows = new Map<string, Map<string, BehaviorSubject<boolean>>>();
+  private savingRowsViews = new Map<string, Map<string, BehaviorSubject<boolean>>[]>();
+  private currentSavingRowsView: Map<string, BehaviorSubject<boolean>>[];
+
+  public renderedSavingRows: Map<string, BehaviorSubject<boolean>>[];
+
+  public readonly loading = this.loadingSubject.asObservable();
+  public readonly buffering = this.bufferingSubject.asObservable();
+  public readonly saveError = this.saveErrorSubject.asObservable();
+  public get renderedRows() {
+    return this.renderedRowsSubject.value;
+  }
+
+  constructor(private uniqueKey, private fetchData: FetchFunction<T>, private changeData: ChangeFunction<T>, private debounce = 300) {}
 
   connect(collectionViewer: CollectionViewer): Observable<T[]> {
     return this.renderedRowsSubject.asObservable();
@@ -50,9 +63,21 @@ export class AsyncDataSource<T> implements DataSource<T> {
     this.renderedRowsSubject.complete();
     this.loadingSubject.complete();
     this.bufferingSubject.complete();
+    this.saveErrorSubject.complete();
+
+    /*for (const savingRow of this.savingCells) {
+      for (const savingSubject of Array.from(savingRow.values())) {
+        savingSubject.complete();
+      }
+    }*/
   }
 
-  public setup(paginator: MatPaginator, sort: MatSort, filterEvent: EventEmitter<string>): void {
+  public setup(
+    paginator: MatPaginator,
+    sort: MatSort,
+    filterEvent: EventEmitter<string>,
+    editedEvent: EventEmitter<{column: string, values: T, rowIndex: number}>
+  ): void {
     this.paginator = paginator;
     this.sort = sort;
 
@@ -91,6 +116,21 @@ export class AsyncDataSource<T> implements DataSource<T> {
       // noinspection JSIgnoredPromiseFromCall
       this.updateCurrentView();
     });
+
+    editedEvent.pipe(
+      debounceTime(this.debounce)
+    ).subscribe(async (event) => {
+      const renderedSavingRow = this.renderedSavingRows[event.rowIndex];
+      renderedSavingRow.get(event.column).next(true);
+
+      try {
+        await this.changeData(event.column, event.values);
+      } catch (error) {
+        this.saveErrorSubject.next(error);
+      } finally {
+        renderedSavingRow.get(event.column).next(false);
+      }
+    });
   }
 
   private async updateCurrentView() {
@@ -110,23 +150,55 @@ export class AsyncDataSource<T> implements DataSource<T> {
     const viewKey = `${this.filter};${this.sort.active};${this.sort.direction}`;
     if (this.rowsViews.has(viewKey) === false) {
       this.rowsViews.set(viewKey, []);
+      this.savingRowsViews.set(viewKey, []);
     }
     this.currentView = this.rowsViews.get(viewKey);
+    this.currentSavingRowsView = this.savingRowsViews.get(viewKey);
 
     for (let i = 0, length = result.items.length; i < length; i++) {
       const row = result.items[i];
-      this.rows[row[this.uniqueKey]] = row;
+      const uniqueValue = row[this.uniqueKey];
 
-      this.currentView[this.currentOffset + i] = this.rows[row[this.uniqueKey]];
+      // This is here, so that the rowsViews don't lose their references to the original row
+      if (!this.rows.has(uniqueValue)) {
+        this.rows.set(uniqueValue, row);
+      } else {
+        for (const column in row) {
+          if (!row.hasOwnProperty(column)) {
+            continue;
+          }
+
+          this.rows.get(uniqueValue)[column] = row[column];
+        }
+      }
+
+      if (!this.savingRows.has(uniqueValue)) {
+        const columns = new Map<string, BehaviorSubject<boolean>>();
+        for (const column in row) {
+          if (!row.hasOwnProperty(column)) {
+            continue;
+          }
+
+          columns.set(column, new BehaviorSubject(false));
+        }
+        this.savingRows.set(uniqueValue, columns);
+      }
+
+      this.currentView[this.currentOffset + i] = this.rows.get(uniqueValue);
+      this.currentSavingRowsView[this.currentOffset + i] = this.savingRows.get(uniqueValue);
     }
 
-    console.log('rowsView', this.currentView);
     this.updateRenderedRows();
 
     this.loadingSubject.next(false);
   }
 
   private updateRenderedRows() {
+    this.renderedSavingRows = this.currentSavingRowsView.slice(
+      this.currentOffset,
+      this.currentOffset + this.paginator.pageSize
+    );
+
     this.renderedRowsSubject.next(
       this.currentView.slice(
         this.currentOffset,

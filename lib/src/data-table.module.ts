@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 
 import {
   MatCardModule, MatCheckboxModule, MatFormFieldModule, MatInputModule, MatTableModule, MatDatepickerModule,
-  MatNativeDateModule, MatSelectModule, MatIconModule, MatMenuModule, MatPaginatorModule, MatSortModule, MatProgressBarModule
+  MatNativeDateModule, MatSelectModule, MatIconModule, MatMenuModule, MatPaginatorModule, MatSortModule, MatProgressBarModule,
+  MatSnackBarModule
 } from '@angular/material';
 
 import { DataTableComponent } from './components/data-table/data-table.component';
@@ -25,6 +26,7 @@ import { DataTableComponent } from './components/data-table/data-table.component
     MatPaginatorModule,
     MatSortModule,
     MatProgressBarModule,
+    MatSnackBarModule,
     FormsModule
   ],
   declarations: [

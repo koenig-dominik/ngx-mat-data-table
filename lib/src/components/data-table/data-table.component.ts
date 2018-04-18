@@ -1,7 +1,9 @@
 import {Component, EventEmitter, Input, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator, MatSort} from '@angular/material';
+import {MatPaginator, MatSnackBar, MatSort} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
 import {merge} from 'rxjs/observable/merge';
+import 'rxjs/add/operator/skip';
+
 import {AsyncDataSource} from './async-data-source';
 
 @Component({
@@ -23,10 +25,13 @@ export class DataTableComponent<T> implements OnInit {
 
   displayedColumns = ['select'];
   selection = new SelectionModel<T>(true, []);
-  filter: string;
-  filterChanged: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor() {
+  filter: string;
+  private filterChanged = new EventEmitter<string>();
+
+  private cellChanged = new EventEmitter<{column: string, values: T, rowIndex: number}>();
+
+  constructor(private snackBar: MatSnackBar) {
 
   }
 
@@ -35,10 +40,24 @@ export class DataTableComponent<T> implements OnInit {
       this.displayedColumns.push(column.name);
     }
 
-    this.dataSource.setup(this.paginator, this.sort, this.filterChanged);
+    this.dataSource.setup(this.paginator, this.sort, this.filterChanged, this.cellChanged);
 
     // If the user changes the sort or the filter, reset back to the first page.
     merge(this.sort.sortChange, this.filterChanged).subscribe(() => this.paginator.pageIndex = 0);
+
+    this.dataSource.saveError.skip(1).subscribe((error) => {
+      this.snackBar.open(error, null, {
+        duration: 2000,
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom'
+      });
+    });
+  }
+
+  cellChange(column: string, row: T, newValue: any, rowIndex: number) {
+    row[column] = newValue;
+
+    this.cellChanged.emit({column: column, values: row, rowIndex: rowIndex});
   }
 
   filterChange(newValue: string) {

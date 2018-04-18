@@ -30,7 +30,7 @@
 
       <ng-container *ngFor="let column of columns" [matColumnDef]="column.name">
         <mat-header-cell mat-sort-header *matHeaderCellDef [style.max-width]="(column.width + 24) + 'px'">{{column.label}}</mat-header-cell>
-        <mat-cell *matCellDef="let row" [style.max-width]="(column.width + 24) + 'px'">
+        <mat-cell *matCellDef="let row; let rowIndex = index" [style.max-width]="(column.width + 24) + 'px'">
           <ng-container *ngIf="!column.editable; else editable">
 
             <ng-container *ngIf="row[column.name].constructor.name !== 'Date'; else date">
@@ -44,9 +44,11 @@
           </ng-container>
           <ng-template #editable>
 
+            <mat-progress-bar [class.show]="dataSource.renderedSavingRows[rowIndex].get(column.name) | async" mode="indeterminate"></mat-progress-bar>
+
             <ng-container *ngIf="column.values; else elseIf">
               <mat-form-field [style.max-width]="column.width + 'px'">
-                <mat-select [value]="row[column.name]">
+                <mat-select [ngModel]="row[column.name]" (ngModelChange)="cellChange(column.name, row, $event, rowIndex)">
                   <mat-option *ngFor="let value of column.values" [value]="value">
                     {{ value }}
                   </mat-option>
@@ -63,7 +65,7 @@
                 <mat-menu #menu="matMenu">
                   <div mat-menu-item disabled class="full-height-menu-item">
                     <mat-form-field class="mat-cell" [style.max-width]="column.width + 'px'"> <!-- mat-cell is a hack to override the disabled state of mat-menu-item -->
-                      <input matInput #message [attr.maxlength]="column.maxLength" [value]="row[column.name]">
+                      <input matInput #message [attr.maxlength]="column.maxLength" [ngModel]="row[column.name]" (ngModelChange)="cellChange(column.name, row, $event, rowIndex)">
                       <mat-hint align="end">{{message.value.length}} / {{column.maxLength}}</mat-hint>
                     </mat-form-field>
                   </div>
@@ -72,7 +74,7 @@
 
               <ng-template #datepicker>
                 <mat-form-field [style.max-width]="column.width + 'px'">
-                  <input matInput [matDatepicker]="picker" [value]="row[column.name]">
+                  <input matInput [matDatepicker]="picker" [ngModel]="row[column.name]" (ngModelChange)="cellChange(column.name, row, $event, rowIndex)">
                   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>

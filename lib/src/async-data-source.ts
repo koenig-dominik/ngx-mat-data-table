@@ -1,11 +1,7 @@
 import {CollectionViewer, DataSource} from '@angular/cdk/collections';
-import {Observable} from 'rxjs/Observable';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {Observable, BehaviorSubject, merge} from 'rxjs';
 import {MatPaginator, MatSort} from '@angular/material';
-import {merge} from 'rxjs/observable/merge';
-import {tap} from 'rxjs/operators';
-import {debounceTime} from 'rxjs/operators/debounceTime';
-import {distinctUntilChanged} from 'rxjs/operators/distinctUntilChanged';
+import {tap, debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {EventEmitter} from '@angular/core';
 
 export type FetchFunction<T> = (

@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, MatSnackBar, MatSort} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
-import {merge} from 'rxjs/observable/merge';
-import 'rxjs/add/operator/skip';
+import {merge} from 'rxjs';
+import {skip} from 'rxjs/operators';
 
 import {AsyncDataSource} from '../../async-data-source';
 
@@ -45,7 +45,7 @@ export class DataTableComponent<T> implements OnInit {
     // If the user changes the sort or the filter, reset back to the first page.
     merge(this.sort.sortChange, this.filterChanged).subscribe(() => this.paginator.pageIndex = 0);
 
-    this.dataSource.saveError.skip(1).subscribe((error) => {
+    this.dataSource.saveError.pipe(skip(1)).subscribe((error) => {
       this.snackBar.open(error, null, {
         duration: 2000,
         horizontalPosition: 'right',

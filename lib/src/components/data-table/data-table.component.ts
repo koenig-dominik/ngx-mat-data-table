@@ -19,7 +19,7 @@ export class DataTableComponent<T> implements OnInit {
   @Input() uniqueColumn: string;
   @Input() pageSizeOptions: number[] = [5, 10, 15];
   @Input() pageSize = 5;
-  @Input() buttons: Button[];
+  @Input() buttons: Button<T>[];
 
   @Input() dataSource: AsyncDataSource<T>;
 
@@ -94,6 +94,7 @@ export interface Column {
   values?: (string | number)[];
 }
 
-export interface Button {
-
+export interface Button<T> {
+  icon: string;
+  action: (selected: T[]) => void;
 }

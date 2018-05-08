@@ -2,11 +2,9 @@
   <div class="header">
     <h2>{{title}}</h2>
     <div class="actions">
-      <button mat-mini-fab color="primary">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-mini-fab color="warn">
-        <mat-icon>delete_forever</mat-icon>
+
+      <button *ngFor="let button of buttons" mat-icon-button (click)="button.action(selection.selected)">
+        <mat-icon>{{button.icon}}</mat-icon>
       </button>
       <mat-form-field class="search-field">
         <input [ngModel]="filter" (ngModelChange)="filterChange($event)" matInput placeholder="Filter">

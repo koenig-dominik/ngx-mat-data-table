@@ -6,7 +6,7 @@ import { AsyncDataSource } from '../../lib/src/async-data-source';
   selector: 'app-root',
   template: `
     <ngx-mat-data-table title="Accounts" sortColumn="createdAt" uniqueColumn="id" 
-                        [dataSource]="dataSource" [columns]="columns">
+                        [dataSource]="dataSource" [columns]="columns" [buttons]="buttons">
       
     </ngx-mat-data-table>
   `,
@@ -21,6 +21,11 @@ export class AppComponent {
     {name: 'email', label: 'Email', editable: true, maxLength: 80},
     {name: 'createdAt', label: 'Created at', width: 100, editable: true},
     {name: 'updatedAt', label: 'Updated at'}
+  ];
+
+  buttons = [
+    {icon: 'add', action: function(selection) {console.log('add', selection); }},
+    {icon: 'delete', action: function(selection) {console.log('delete', selection); }}
   ];
 
   dataSource: AsyncDataSource<{}>;

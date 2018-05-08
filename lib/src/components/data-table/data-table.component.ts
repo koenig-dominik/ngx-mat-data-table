@@ -17,6 +17,9 @@ export class DataTableComponent<T> implements OnInit {
   @Input() columns: Column[];
   @Input() sortColumn: string;
   @Input() uniqueColumn: string;
+  @Input() pageSizeOptions: number[] = [5, 10, 15];
+  @Input() pageSize = 5;
+  @Input() buttons: Button[];
 
   @Input() dataSource: AsyncDataSource<T>;
 
@@ -89,4 +92,8 @@ export interface Column {
   editable?: boolean;
   maxLength?: number;
   values?: (string | number)[];
+}
+
+export interface Button {
+
 }

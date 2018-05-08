@@ -2,18 +2,29 @@
   display: block;
 
   ::ng-deep {
-    .mat-card {
-      padding: 0;
-      .mat-card-header {
-        padding-left: 24px;
-        padding-right: 24px;
-        padding-top: 24px;
-      }
-    }
-
     .mat-cell {
       .mat-form-field-underline {
         visibility: hidden;
+      }
+    }
+  }
+
+  .header {
+    padding-top: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
+
+    h2 {
+      display: inline;
+    }
+
+    .actions {
+      display: inline-block;
+      float: right;
+
+      .search-field,
+      button {
+        margin-left: 10px;
       }
     }
   }

@@ -97,4 +97,6 @@ export interface Column {
 export interface Button<T> {
   icon: string;
   action: (selected: T[]) => void;
+  selectionRequired: boolean;
+  multiSelection: boolean;
 }

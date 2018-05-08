@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MockBackendService } from './mock-backend.service';
-import { AsyncDataSource } from '../../lib/src/async-data-source';
+import { AsyncDataSource } from '../../lib/src';
 
 @Component({
   selector: 'app-root',
@@ -24,8 +24,8 @@ export class AppComponent {
   ];
 
   buttons = [
-    {icon: 'add', action: function(selection) {console.log('add', selection); }},
-    {icon: 'delete', action: function(selection) {console.log('delete', selection); }}
+    {icon: 'add', action: this.add()},
+    {icon: 'delete', action: this.delete(), selectionRequired: true, multiSelection: true}
   ];
 
   dataSource: AsyncDataSource<{}>;
@@ -43,6 +43,18 @@ export class AppComponent {
   saveData() {
     return async (column: string, values: {}) => {
       return await this.mockBackendService.update(column, values);
+    };
+  }
+
+  delete() {
+    return async(selected) => {
+      return await this.mockBackendService.delete(selected);
+    };
+  }
+
+  add() {
+    return async() => {
+      return await this.mockBackendService.add();
     };
   }
 

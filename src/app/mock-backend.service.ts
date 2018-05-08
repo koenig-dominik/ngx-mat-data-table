@@ -43,6 +43,18 @@ export class MockBackendService {
     }
   }
 
+  public async delete(selected: any[]) {
+    await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
+
+    console.log('delete', selected);
+  }
+
+  public async add() {
+    await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
+
+    console.log('add');
+  }
+
   public async get(filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) {
     await MockBackendService.sleep(Math.floor(Math.random() * (MockBackendService.maxWaitSeconds * 1000)));
 

@@ -3,7 +3,10 @@
     <h2>{{title}}</h2>
     <div class="actions">
 
-      <button *ngFor="let button of buttons" mat-icon-button (click)="button.action(selection.selected)">
+      <button *ngFor="let button of buttons"
+              mat-icon-button
+              (click)="button.action(selection.selected)"
+              [disabled]="button.selectionRequired && selection.selected.length === 0 || button.selectionRequired && !button.multiSelection && selection.selected.length > 1">
         <mat-icon>{{button.icon}}</mat-icon>
       </button>
       <mat-form-field class="search-field">

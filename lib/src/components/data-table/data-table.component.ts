@@ -1,22 +1,22 @@
-import {Component, EventEmitter, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, MatSnackBar, MatSort} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
 import {merge} from 'rxjs';
 import {skip} from 'rxjs/operators';
 
 import {AsyncDataSource} from '../../async-data-source';
+import {Subscription} from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'ngx-mat-data-table',
   templateUrl: 'data-table.component.html',
   styleUrls: ['./data-table.component.scss']
 })
-export class DataTableComponent<T> implements OnInit {
+export class DataTableComponent<T> implements OnInit, OnDestroy {
 
   @Input() title: string;
   @Input() columns: Column[];
   @Input() sortColumn: string;
-  @Input() uniqueColumn: string;
   @Input() pageSizeOptions: number[] = [5, 10, 15];
   @Input() pageSize = 5;
   @Input() buttons: Button<T>[];
@@ -33,6 +33,8 @@ export class DataTableComponent<T> implements OnInit {
   private filterChanged = new EventEmitter<string>();
 
   private cellChanged = new EventEmitter<{column: string, values: T, rowIndex: number}>();
+
+  private renderedRowsSubscription: Subscription;
 
   constructor(private snackBar: MatSnackBar) {
 
@@ -55,6 +57,19 @@ export class DataTableComponent<T> implements OnInit {
         verticalPosition: 'bottom'
       });
     });
+
+    // Deselects rows if they are not in the current filter or page
+    this.renderedRowsSubscription = this.dataSource.renderedRowsObservable.subscribe((renderedRows) => {
+      for (const selected of this.selection.selected) {
+        if (renderedRows.indexOf(selected) === -1) {
+          this.selection.deselect(selected);
+        }
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.renderedRowsSubscription.unsubscribe();
   }
 
   cellChange(column: string, row: T, newValue: any, rowIndex: number) {

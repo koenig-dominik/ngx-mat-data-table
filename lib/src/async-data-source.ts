@@ -48,6 +48,7 @@ export class AsyncDataSource<T> implements DataSource<T> {
   public get renderedRows() {
     return this.renderedRowsSubject.value;
   }
+  public readonly renderedRowsObservable = this.renderedRowsSubject.asObservable();
 
   constructor(private uniqueKey, private fetchData: FetchFunction<T>, private changeData: ChangeFunction<T>, private debounce = 300) {}
 

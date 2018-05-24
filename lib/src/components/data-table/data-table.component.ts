@@ -93,7 +93,7 @@ export class DataTableComponent<T> implements OnInit, OnDestroy {
   }
 
   /** Whether the number of selected elements matches the total number of rows displayed. */
-  private isAllSelected() {
+  isAllSelected() {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.renderedRows.length;
     return numSelected === numRows;

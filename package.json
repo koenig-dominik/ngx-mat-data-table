@@ -6,17 +6,22 @@
   "license": "MIT",
   "private": false,
   "peerDependencies": {
-    "@angular/core": ">=5.2.0",
-    "@angular/common": ">=5.2.0",
-    "@angular/cdk": ">=5.2.4",
-    "@angular/material": ">=5.2.4"
+    "@angular/core": ">=6.0.2",
+    "@angular/common": ">=6.0.2",
+    "@angular/cdk": ">=6.0.0",
+    "@angular/material": ">=6.0.0"
   },
   "main": "bundles/ngx-mat-data-table.umd.js",
-  "module": "esm5/ngx-mat-data-table.js",
-  "es2015": "esm2015/ngx-mat-data-table.js",
+  "module": "fesm5/ngx-mat-data-table.js",
+  "es2015": "fesm2015/ngx-mat-data-table.js",
+  "esm5": "esm5/ngx-mat-data-table.js",
+  "esm2015": "esm2015/ngx-mat-data-table.js",
+  "fesm5": "fesm5/ngx-mat-data-table.js",
+  "fesm2015": "fesm2015/ngx-mat-data-table.js",
   "typings": "ngx-mat-data-table.d.ts",
   "metadata": "ngx-mat-data-table.metadata.json",
+  "sideEffects": false,
   "dependencies": {
-    "tslib": "^1.7.1"
+    "tslib": "^1.9.0"
   }
 }

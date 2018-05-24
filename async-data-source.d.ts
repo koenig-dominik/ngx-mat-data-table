@@ -1,6 +1,5 @@
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { MatPaginator, MatSort } from '@angular/material';
 import { EventEmitter } from '@angular/core';
 export declare type FetchFunction<T> = (filter: string, sortColumn: string, sortDirection: string, offset: number, fetchSize: number) => Promise<{
@@ -32,6 +31,7 @@ export declare class AsyncDataSource<T> implements DataSource<T> {
     readonly buffering: Observable<boolean>;
     readonly saveError: Observable<string>;
     readonly renderedRows: T[];
+    readonly renderedRowsObservable: Observable<T[]>;
     constructor(uniqueKey: any, fetchData: FetchFunction<T>, changeData: ChangeFunction<T>, debounce?: number);
     connect(collectionViewer: CollectionViewer): Observable<T[]>;
     disconnect(collectionViewer: CollectionViewer): void;
